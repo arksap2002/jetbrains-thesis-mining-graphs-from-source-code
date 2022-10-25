@@ -3,12 +3,16 @@
 const OPEN_BRACKET = "{";
 const CLOSE_BRACKET = "}";
 define("TOKENS", PhpToken::tokenize(file_get_contents($argv[1])));
+define("TEST", $argv[1]);
 
 main();
 
 function main(): void
 {
     for ($i = 0; $i < sizeof(TOKENS); $i++) {
+        if (TOKENS[$i]->id == T_INTERFACE) {
+            break;
+        }
         if (TOKENS[$i]->id == T_FUNCTION) {
             functionProcess($i);
         }
@@ -35,7 +39,7 @@ function functionProcess(&$index): void
         $size . "\t" .
         $numberOfIF . "\t" .
         $numberOfFor . "\t" .
-        $numberOfWhile . "\n", FILE_APPEND);
+        $numberOfWhile . "\n", FILE_APPEND | LOCK_EX);
 }
 
 function goBackOnTokens($index, &$comment, &$modifier): void
@@ -60,8 +64,10 @@ function getName(&$index): string
     while (TOKENS[$index]->id == T_WHITESPACE) {
         $index++;
     }
-    assert(TOKENS[$index]->id == T_STRING);
-    return TOKENS[$index]->text;
+    if (TOKENS[$index]->id == T_STRING) {
+        return TOKENS[$index]->text;
+    }
+    return "";
 }
 
 function getNumberOfArguments(&$index): int
@@ -107,7 +113,7 @@ function getComment(&$index): string
 {
     skipWhitespaces($index);
     if (TOKENS[$index]->id == T_COMMENT) {
-        return TOKENS[$index]->text;
+        return str_replace("\n", " ", TOKENS[$index]->text);
     }
     return "";
 }
