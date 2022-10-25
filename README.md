@@ -1,18 +1,19 @@
 # Mining graphs from source code test task
 ## Solution
 ### Description
+I found different options for parsing php files. Usually the best way to do it is converting a code to an AST tree, but for this task I decided to split a code to different tokens using [PhpToken::tokenize](https://www.php.net/manual/en/phptoken.tokenize.php) command. This list of tokens is really comfortable to find data of functions – walk around `T_FUNCTION` tokens.\
+The schema of my solution is iterating through the list of the repositories and for each project do operations: cloning, processing and removing.\
+I have a php script that parses php code and puts data in the `data.txt` file, bash script for running php script with all php files and another bash script for working with repositories.
 ### Dataset
 I took a dataset from [top 100 php projects](https://github.com/ozh/top_100_PHP_projects).
 ### Files
-```
-main.php – php parser. `argv[1]` is the name of a parsing file. Put data in `data.txt`
-processPhpFiles.sh – running the parser with all current php files (instead of `main.php`)
-repositories.txt – names of php repositories
-run.sh – applying `processPhpFiles.sh` to all repositories
-data.zip – zip of `data.txt` and `data.ods` files
-data.txt – output data
-data.ods – sheet with data
-```
+`main.php` – php parser. `argv[1]` is the name of a parsing file\
+`processPhpFiles.sh` – running the parser with all current php files (instead of `main.php`)\
+`repositories.txt` – names of php repositories\
+`run.sh` – applying `processPhpFiles.sh` to all repositories\
+`data.zip` – zip of `data.txt` and `data.ods` files\
+`data.txt` – output data\
+`data.ods` – sheet with data
 ## Conclusion
 I generated a `data.txt` file with data of functions in all projects, which I put in `LibreOffice Calc` – `data.ods` and got different results:
 ```
