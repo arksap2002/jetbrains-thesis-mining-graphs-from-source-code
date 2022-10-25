@@ -3,19 +3,21 @@
 const OPEN_BRACKET = "{";
 const CLOSE_BRACKET = "}";
 define("TOKENS", PhpToken::tokenize(file_get_contents($argv[1])));
-define("TEST", $argv[1]);
 
 main();
 
 function main(): void
 {
+    $isAbstractOrUse = false;
     for ($i = 0; $i < sizeof(TOKENS); $i++) {
-        if (TOKENS[$i]->id == T_INTERFACE) {
+        if (TOKENS[$i]->id == T_INTERFACE || TOKENS[$i]->id == T_TRAIT || TOKENS[$i]->id == T_TRAIT_C) {
             break;
         }
-        if (TOKENS[$i]->id == T_FUNCTION) {
+        if (TOKENS[$i]->id == T_FUNCTION && !$isAbstractOrUse) {
             functionProcess($i);
         }
+        $isAbstractOrUse = $isAbstractOrUse || TOKENS[$i]->id == T_ABSTRACT || TOKENS[$i]->id == T_USE;
+        $isAbstractOrUse = $isAbstractOrUse && (TOKENS[$i]->id != T_FUNCTION);
     }
 }
 
@@ -103,7 +105,7 @@ function skipWhitespaces(&$index): void
 function getModifier(&$index): string
 {
     skipWhitespaces($index);
-    if (TOKENS[$index]->id == T_PRIVATE || TOKENS[$index]->id == T_PUBLIC) {
+    if (TOKENS[$index]->id == T_PRIVATE || TOKENS[$index]->id == T_PROTECTED || TOKENS[$index]->id == T_PUBLIC) {
         return TOKENS[$index--]->text;
     }
     return "";
@@ -113,7 +115,7 @@ function getComment(&$index): string
 {
     skipWhitespaces($index);
     if (TOKENS[$index]->id == T_COMMENT) {
-        return str_replace("\n", " ", TOKENS[$index]->text);
+        return str_replace("\t", "", str_replace("\n", "", TOKENS[$index]->text));
     }
     return "";
 }
